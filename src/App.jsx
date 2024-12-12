@@ -123,26 +123,41 @@ const Box = styled.div`
   align-items: center;
 `;
 
+const ErrorMessage = styled.p`
+  color: red;
+  font-size: 14px;
+  margin-top: -10px;
+  margin-bottom: 10px;
+  text-align: left;
+  width: 100%;
+  max-width: 600px;
+`;
+
 const App = () => {
   const [tasks, setTasks] = useState([]);
   const [taskInput, setTaskInput] = useState("");
+  const [error, setError] = useState("");
 
   const handleAddTask = () => {
-    if (taskInput.trim()) {
-      setTasks([...tasks, taskInput]);
-      setTaskInput("");
-    }
-  };
+    const trimmedTask = taskInput.trim().toLowerCase();
 
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter") {
-      handleAddTask();
+    if (!trimmedTask) {
+      setError("El campo de tarea está vacío.");
+      return;
     }
+    
+    if (tasks.some(task => task.toLowerCase() === trimmedTask)) {
+      setError("¡La tarea ya existe!");
+      return;
+    }
+
+    setTasks([...tasks, taskInput.trim()]);
+    setTaskInput("");
+    setError("");
   };
 
   const handleDeleteTask = (index) => {
-    const updatedTasks = tasks.filter((_, i) => i !== index);
-    setTasks(updatedTasks);
+    setTasks(tasks.filter((_, i) => i !== index));
   };
 
   const handleClearAll = () => {
@@ -165,6 +180,7 @@ const App = () => {
             />
             <AddButton onClick={handleAddTask}>Agregar</AddButton>
           </Form>
+          {error && <ErrorMessage>{error}</ErrorMessage>}
           <TaskList>
             {tasks.map((task, index) => (
               <TaskItem key={index}>
